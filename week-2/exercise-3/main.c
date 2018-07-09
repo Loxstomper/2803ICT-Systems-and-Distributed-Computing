@@ -44,7 +44,7 @@ int main()
     int dst[SIZE][SIZE];
 
     /* TimerStart(); */
-    CopyAB(src, dst);
+    /* CopyAB(src, dst); */
     /* delay1 = TimerStop(); */
 
 
@@ -54,6 +54,12 @@ int main()
 
     /* printf("Delay1: %lu \n", delay1); */
     /* printf("Delay2: %lu \n", delay2); */
+
+
+    int a[8];
+    a[0] = 5;
+
+    printf("%d", a[0]);
 
     return 0;
 }
