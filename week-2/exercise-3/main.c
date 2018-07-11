@@ -1,16 +1,23 @@
 #include <time.h>
 #include <stdio.h>
-#define SIZE 1024
 
-/* void TimerStart(unsigned long* delay1, unsigned long* delay2) */
-/* { */
-    
-/* } */
+/* can only use a 'small' size, otherwise stack overflow occurs, would be better to dynamically allocate to */ 
+/* the heap */
+#define SIZE 1023 
 
-/* void TimerStop() */
-/* { */
+void TimerStart(struct timespec* before)
+{
+    clock_gettime(CLOCK_MONOTONIC, before);
+}
 
-/* } */
+unsigned long TimerStop(struct timespec* before)
+{
+    struct timespec after;
+
+    clock_gettime(CLOCK_MONOTONIC, &after);
+
+    return after.tv_nsec - before->tv_nsec;
+}
 
 void CopyAB(int a[SIZE][SIZE], int b[SIZE][SIZE])
 {
@@ -18,10 +25,8 @@ void CopyAB(int a[SIZE][SIZE], int b[SIZE][SIZE])
     {
         for (int j = 0; j < SIZE; j ++)
         {
-            /* b[i][j] = a[i][j]; */
-            printf("%d", a[i][j]);
+            b[i][j] = a[i][j];
         }
-        printf("\n");
     }
 }
 
@@ -38,28 +43,24 @@ void CopyBA(int a[SIZE][SIZE], int b[SIZE][SIZE])
 
 int main()
 {
-    /* const int size = 1024; */
     unsigned long delay1, delay2;
     int src[SIZE][SIZE];
     int dst[SIZE][SIZE];
+    struct timespec before;
 
-    /* TimerStart(); */
-    /* CopyAB(src, dst); */
-    /* delay1 = TimerStop(); */
-
-
-    /* TimerStart(); */
-    /* CopyBA(src, dst); */
-    /* delay2 = TimerStop(); */
-
-    /* printf("Delay1: %lu \n", delay1); */
-    /* printf("Delay2: %lu \n", delay2); */
+    TimerStart(&before);
+    CopyAB(src, dst);
+    delay1 = TimerStop(&before);
 
 
-    int a[8];
-    a[0] = 5;
+    TimerStart(&before);
+    CopyBA(src, dst);
+    delay2 = TimerStop(&before);
 
-    printf("%d", a[0]);
+    printf("Delay1 (ns): %lu \n", delay1);
+    printf("Delay2 (ns): %lu \n", delay2);
+
+
 
     return 0;
 }
