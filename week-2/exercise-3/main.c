@@ -1,9 +1,12 @@
 #include <time.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 /* can only use a 'small' size, otherwise stack overflow occurs, would be better to dynamically allocate to */ 
 /* the heap */
-#define SIZE 1023 
+#define SIZE 512    
+/* int src[SIZE][SIZE]; */
+/* int dst[SIZE][SIZE]; */
 
 void TimerStart(struct timespec* before)
 {
@@ -19,7 +22,7 @@ unsigned long TimerStop(struct timespec* before)
     return after.tv_nsec - before->tv_nsec;
 }
 
-void CopyAB(int a[SIZE][SIZE], int b[SIZE][SIZE])
+void CopyAB(int** a, int** b)
 {
     for (int i = 0; i < SIZE; i ++)
     {
@@ -30,7 +33,7 @@ void CopyAB(int a[SIZE][SIZE], int b[SIZE][SIZE])
     }
 }
 
-void CopyBA(int a[SIZE][SIZE], int b[SIZE][SIZE])
+void CopyBA(int** a, int** b)
 {
     for (int i = 0; i < SIZE; i ++)
     {
@@ -44,9 +47,25 @@ void CopyBA(int a[SIZE][SIZE], int b[SIZE][SIZE])
 int main()
 {
     unsigned long delay1, delay2;
-    int src[SIZE][SIZE];
-    int dst[SIZE][SIZE];
+    /* int src[SIZE][SIZE]; */
+    /* int dst[SIZE][SIZE]; */
     struct timespec before;
+
+    int ** src = (int**) malloc (sizeof(int*) * SIZE);
+    int ** dst = (int**) malloc (sizeof(int*) * SIZE);
+
+    for (int i = 0; i < SIZE; ++i)
+    {
+        src[i] = (int*) malloc (sizeof(int) * SIZE);
+        dst[i] = (int*) malloc (sizeof(int) * SIZE);
+    }
+
+    int ** c = (int**) malloc (sizeof(int*) * 4096);
+
+    for (int i = 0; i < 4096; ++i)
+    {
+        c[i] = (int*) malloc (sizeof(int) * 4096);
+    }
 
     TimerStart(&before);
     CopyAB(src, dst);
@@ -59,8 +78,6 @@ int main()
 
     printf("Delay1 (ns): %lu \n", delay1);
     printf("Delay2 (ns): %lu \n", delay2);
-
-
 
     return 0;
 }

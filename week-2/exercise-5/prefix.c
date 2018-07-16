@@ -1,6 +1,12 @@
 #include "prefix.h"
 #include <stdio.h>
 
+struct Symbol
+{
+    char* name;
+    enum type {'int', 'float'};
+} Symbol;
+
 int main(int argc, char *argv[])
 {
     const int min_args = 2;
