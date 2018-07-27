@@ -34,6 +34,7 @@ double calculate(double x, int* function)
     }
 }
 
+
 void generate(int* start_x, int* end_x, int* step_x, int* function)
 {
     printf("\tX\t|\tY\t\n");
