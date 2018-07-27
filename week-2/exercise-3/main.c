@@ -8,6 +8,7 @@
 /* int src[SIZE][SIZE]; */
 /* int dst[SIZE][SIZE]; */
 
+#ifdef __linux__
 void TimerStart(struct timespec* before)
 {
     clock_gettime(CLOCK_MONOTONIC, before);
@@ -21,6 +22,11 @@ unsigned long TimerStop(struct timespec* before)
 
     return after.tv_nsec - before->tv_nsec;
 }
+#endif
+
+#ifdef __win32
+
+#endif
 
 void CopyAB(int** a, int** b)
 {
@@ -49,7 +55,14 @@ int main()
     unsigned long delay1, delay2;
     /* int src[SIZE][SIZE]; */
     /* int dst[SIZE][SIZE]; */
+
+#ifdef __linux__
     struct timespec before;
+#endif
+
+#ifdef __win32
+    struct sdadsadsads before;
+#endif
 
     int ** src = (int**) malloc (sizeof(int*) * SIZE);
     int ** dst = (int**) malloc (sizeof(int*) * SIZE);
