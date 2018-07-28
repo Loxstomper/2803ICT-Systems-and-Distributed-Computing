@@ -20,8 +20,16 @@ int main(int argc, char ** argv)
     printf("Going to sleep for %d seconds.\n", sleep_time);
 
 #ifdef __linux__
+    char buffer[1024];
+    getcwd(buffer, sizeof(buffer));
+    printf("Current Path: %s \n", buffer);
+
     sleep(sleep_time);
 #else
+    char buffer[MAX_PATH];
+    GetModuleFileName(NULL, buffer, MAX_PATH);
+    printf("Current Path: %s \n", buffer);
+
     Sleep(sleep_time);
 #endif
 
