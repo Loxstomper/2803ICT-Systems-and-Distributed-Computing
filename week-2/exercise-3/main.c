@@ -1,4 +1,12 @@
+
+#ifdef __linux__
 #include <time.h>
+#endif
+
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -24,7 +32,19 @@ unsigned long TimerStop(struct timespec* before)
 }
 #endif
 
-#ifdef __win32
+#ifdef _WIN32 
+void TimerStart(__int64* freq, __int64* start)
+{
+    QueryPerformanceFrequency((LARGE_INTEGER*) freq);
+    QueryPerformanceFrequency((LARGE_INTEGER*) start);
+
+}
+
+double TimerStop(__int64* freq, __int64* end, __int64* start)
+{
+    QueryPerformanceCounter((LARGE_INTEGER*) end);
+    return ((*end-*start) * 1000) / *freq;
+}
 
 #endif
 
@@ -52,16 +72,17 @@ void CopyBA(int** a, int** b)
 
 int main()
 {
-    unsigned long delay1, delay2;
     /* int src[SIZE][SIZE]; */
     /* int dst[SIZE][SIZE]; */
 
 #ifdef __linux__
     struct timespec before;
+    unsigned long delay1, delay2;
 #endif
 
-#ifdef __win32
-    struct sdadsadsads before;
+#ifdef __WIN32 
+    __int64 freq, start, end;
+    double delay1, delay2;
 #endif
 
     int ** src = (int**) malloc (sizeof(int*) * SIZE);
@@ -80,10 +101,10 @@ int main()
         c[i] = (int*) malloc (sizeof(int) * 4096);
     }
 
+#ifdef __linux__
     TimerStart(&before);
     CopyAB(src, dst);
     delay1 = TimerStop(&before);
-
 
     TimerStart(&before);
     CopyBA(src, dst);
@@ -91,6 +112,22 @@ int main()
 
     printf("Delay1 (ns): %lu \n", delay1);
     printf("Delay2 (ns): %lu \n", delay2);
+#endif
+
+#ifdef _WIN32 
+    TimerStart(&freq, &start);
+    CopyAB(src, dst);
+    delay1 = TimerStop(&freq, &end, &start);
+
+    TimerStart(&freq, &start);
+    CopyBA(src, dst);
+    delay2 = TimerStop(&freq, &end, &start);
+
+    printf("Delay1 (ns): %lu \n", delay1);
+    printf("Delay2 (ns): %lu \n", delay2);
+    
+#endif
+
 
     return 0;
 }
