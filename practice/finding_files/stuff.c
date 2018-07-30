@@ -27,6 +27,9 @@ long int get_file_size(const char* f)
         return st.st_size;
     }
 
+    printf("FUCK\n");
+    printf("test: %a \n", st);
+
     return -1;
 }
 

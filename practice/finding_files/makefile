@@ -1,3 +1,5 @@
+CC=i686-win64-mingw32-gcc
+
 out: main.o stuff.o
 	cc -o out main.o stuff.o
 
