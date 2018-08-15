@@ -29,9 +29,51 @@ char* get_OS_type()
 
 int main(int argc, char ** argv)
 {
-    char buff[1024];
-    get_host_name(buff, 1024);
-    printf("NAME: %s\n", buff);
-    /* printf("TIME: %s\n", get_system_time()); */
+    printf("Server starting\n");
+    int socket_desc, client_sock, c, read_size;
+    struct sockaddr_in server, client;
+
+    char client_message[1024];
+
+    /* create the socket */
+    socket_desc = socket(AF_INET, SOCK_STREAM, 0);
+
+    if (socket_desc == -1) 
+    {
+        printf("Failed to create socket\n"); 
+        return -1;
+    }
+    printf("Socket created\n");
+
+    /* set up the struct */
+    server.sin_family = AF_INET;
+    server.sin_addr.s_addr = INADDR_ANY;
+    server.sin_port = htons(9999);
+
+    /* bind */
+    if (bind(socket_desc, (struct sockaddr*)&server, sizeof(server)) < 0)
+    {
+        printf("Bind Fail\n");
+        return -1;
+    }
+
+    printf("Bind complete\n");
+
+    listen(socket_desc, 3);
+    
+    c = sizeof(struct sockaddr_in);
+
+    client_sock = accept(socket_desc, (struct sockaddr*)&client, (socklen_t*)&c);
+
+    while((read_size = read(client_sock, client_message, sizeof(client_message))) > 0)
+    {
+        printf("Message: %s\n", client_message);
+    }
+
+    if (read_size == 0)
+    {
+        printf("Client desconnected\n");
+    }
+
     return 0;
 }
