@@ -34,6 +34,7 @@ int main(int argc, char ** argv)
     struct sockaddr_in server, client;
 
     char client_message[1024];
+    char to_send[1024];
 
     /* create the socket */
     socket_desc = socket(AF_INET, SOCK_STREAM, 0);
@@ -65,14 +66,42 @@ int main(int argc, char ** argv)
 
     client_sock = accept(socket_desc, (struct sockaddr*)&client, (socklen_t*)&c);
 
+    if (client_sock < 0)
+    {
+        printf("Accept failed!\n");
+        return -1;
+    }
+
+    printf("Connection accepted\n");
+
     while((read_size = read(client_sock, client_message, sizeof(client_message))) > 0)
     {
         printf("Message: %s\n", client_message);
+
+        if ((strcmp(client_message, "time")) == 0)
+        {
+            strcpy(to_send, get_system_time());
+        }
+        else if ((strcmp(client_message, "type")) == 0)
+        {
+            strcpy(to_send, get_OS_type());
+        }
+        else if ((strcmp(client_message, "host")) == 0)
+        {
+            get_host_name(to_send, 1024);
+        }
+        else
+        {
+            strcpy(to_send, "Invalid command");
+        }
+
+        write(client_sock, to_send, strlen(to_send));
+        memset(&client_message, '\0', strlen(client_message));
     }
 
     if (read_size == 0)
     {
-        printf("Client desconnected\n");
+        printf("Client disconnected\n");
     }
 
     return 0;
