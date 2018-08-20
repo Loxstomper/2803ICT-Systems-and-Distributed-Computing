@@ -1,39 +1,16 @@
 #include "common.h"
 
-#include <stdlib.h>
-#include <math.h>
-
-void TimerStart(struct timespec* before)
-{
-    clock_gettime(CLOCK_MONOTONIC, before);
-}
-
-unsigned long TimerStop(struct timespec* before)
-{
-    struct timespec after;
-    
-    clock_gettime(CLOCK_MONOTONIC, &after);
-
-    /* unsigned long ms; */
-    /* time_t s; */
-
-    /* s = (after.tv_sec - before->tv_sec); */
-    /* ms = ((after.tv_nsec - before->tv_nsec) / 1.0e6); */
-
-    /* if (ms > 999) */
-    /* { */
-    /*     ms = 0; */
-    /* } */
-
-    /* return ms; */
-
-    return ((after.tv_nsec - before->tv_nsec) / 1.0e6);
-}
 
 int main(int argc, char ** argv)
 {
-    struct timespec before;
-    unsigned long delay;
+
+    if (argc != 2)
+    {
+        printf("./client IP\n");
+        return 1;
+    }
+
+
     char message[1024];
     char reply[2048];
     int sock;
@@ -65,15 +42,18 @@ int main(int argc, char ** argv)
     while (1)
     {
         printf("\nRequest: ");
-        scanf("%s", message);
-
-        /* start timer */
-        TimerStart(&before);
+        fgets(message, 1024, stdin);
 
         if (send(sock, message, strlen(message), 0) < 0)
         {
             printf("Send Failed!\n");
             return -1;
+        }
+
+
+        if ((strcmp(message, "quit\n")) == 0)
+        {
+            break;
         }
 
         if (recv(sock, reply, 2048, 0) < 0)
@@ -82,13 +62,9 @@ int main(int argc, char ** argv)
             return -1;
         }
 
-        /* stop timer */
-        delay = TimerStop(&before);
-
-        printf("Reply: %s \n", reply);
-        printf("Delay: %lu \n", delay);
-
+        printf("Reply: %s\n", reply);
         memset(&reply, '\0', strlen(reply));
+        memset(&message, '\0', strlen(message));
     }
 
     close(sock);
