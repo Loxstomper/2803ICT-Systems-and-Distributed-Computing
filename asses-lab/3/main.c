@@ -6,6 +6,7 @@
 #include <sys/time.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 
 #define BUFFER_SIZE 1024
 
@@ -57,48 +58,64 @@ int top(stack_structure *temp)
       return temp->stack[0];
 }
  
-void evaluate_prefix(stack_structure *temp, char operator, int x, int y)
+
+int isOperand(char c)
 {
-      int result;
-      switch(operator)
-      {
-            case '-': result = x - y;
-                      break;
-            case '*': result = x * y;
-                      break;
-            case '%': result = x % y;
-                      break;
-            case '/': result = x / y;
-                      break;
-            case '+': result = x + y;
-                      break;
-            case '$': result = pow(x, y);
-                      break;
-      }
-      push(temp, result);
+    // If the character is a digit then it must
+    // be an operand
+    return isdigit(c);
 }
- 
-int find_operator(char ch)
+
+int evaluatePrefix(char* exprsn)
 {
-      switch(ch)
-      {
-            case '%': return 20;
-            case '/': return 20; 
-            case '*': return 20;
-            case '-': return 20;
-            case '$': return 20;
-            case '+': return 20;
-            default : return 10;
-      }
-}
+    // printf("EVALUATING THE PREFIX\n\n");
+    stack_structure Stack;
+    initialize(&Stack);
  
+    for (int j = strlen(exprsn) - 1; j >= 0; j--) 
+    {
+ 
+        // Push operand to Stack
+        // To convert exprsn[j] to digit subtract
+        // '0' from exprsn[j].
+        if (isOperand(exprsn[j])) 
+        {
+            push(&Stack, exprsn[j] - '0');
+        }
 
-
-
+        else 
+        {
+            // Operator encountered
+            // Pop two elements from Stack
+            int o1 = pop(&Stack);
+            int o2 = pop(&Stack);
+ 
+            // Use switch case to operate on o1 
+            // and o2 and perform o1 O o2.
+            switch (exprsn[j]) 
+            {
+                case '+':
+                    push(&Stack, o1 + o2);
+                    break;
+                case '-':
+                    push(&Stack, o1 - o2);
+                    break;
+                case '*':
+                    push(&Stack, o1 * o2);
+                    break;
+                case '/':
+                    push(&Stack, o1 / o2);
+                    break;
+            }
+        }
+    }
+    
+    // printf("TOP OF STACK: [%d]\n", top(&Stack));
+    return top(&Stack);
+}
 
 
 // --------------- MAIN STUFF ------------------ //
-
 
 int main(int argc, char** argv)
 {
@@ -126,10 +143,9 @@ int main(int argc, char** argv)
     // +++++++++++++ FORK ++++++++++++ //
     if ((child_pid = fork()) == 0)
     {
-        int x, y, element, length, count, result;
-        stack_structure expression_stack;
-        initialize(&expression_stack);
         char output[BUFFER_SIZE];
+        int result;
+
 
         while (1)
         {
@@ -144,31 +160,12 @@ int main(int argc, char** argv)
             else
             {
                 // ============= PREFIX =========== //
-                length = strlen(buffer);
+                // printf("I, the child read [%s]\n", buffer);
+                result = evaluatePrefix(buffer);
+                // printf("I, the child calculated: [%d]\n", result);
 
-                for(count = length - 1; count >= 0; count--)
-                {
-                    if(buffer[count] == '\0' || buffer[count] == ' ')
-                    {
-                        continue;
-                    }
-                    switch(find_operator(buffer[count]))
-                    {
-                        case 20 :   x = pop(&expression_stack);
-                                    y = pop(&expression_stack);
-                                    evaluate_prefix(&expression_stack, buffer[count], x, y);
-                                    break;
-                        case 10 : element = buffer[count] - '0';
-                                    push(&expression_stack, element);
-                                    break;
-                    }
-                }
-
-                result = top(&expression_stack);
-
-
-                sprintf(output, "Result: %d", result);
-                printf("CHILD CALCULATED: [%d]\n", result);
+                memset(output, '\0', strlen(output));
+                sprintf(output, "%d", result);
 
                 // ==================================== //
 
@@ -184,6 +181,9 @@ int main(int argc, char** argv)
     }
     else
     {
+        // get the UI nice
+        printf("\n");
+
         while (1)
         {
             close(p1[0]);
@@ -192,6 +192,8 @@ int main(int argc, char** argv)
             printf("Expression: ");
 
             fgets(buffer, BUFFER_SIZE, stdin);
+            // fgets adds new line char
+            buffer[strlen(buffer) - 1] = '\0';
 
             // printf("Parenting writing to pipe1\n");
             if (write(p1[1], buffer, strlen(buffer) + 1) == -1)
@@ -206,7 +208,7 @@ int main(int argc, char** argv)
             }
             else
             {
-                printf("Result: %s\n", buffer);
+                printf("Result    : %s\n\n", buffer);
             }
         }
     }
