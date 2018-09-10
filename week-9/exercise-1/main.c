@@ -2,33 +2,34 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <math.h>
 
 struct Args
 { 
-    long long int n;
-    long long int start;
-    long long int end;
+    unsigned long long int n;
+    unsigned long long int start;
+    unsigned long long int end;
     int thread_n;
 };
 
 
 void* factor(void* args)
 {
-    usleep(1000);
     struct Args* arg = (struct Args*)args;
-    long long int n = arg->n;
+    unsigned long long int n = arg->n;
 
     printf("Thread: %d\tStart: %lld\tEnd: %lld\n", arg->thread_n, arg->start, arg->end);
+    usleep(1000);
 
-    for (long long int i = arg->start; i <= arg->end; ++i)
+    for (unsigned long long int i = arg->start; i <= arg->end; ++i)
     {
         if (n % i == 0)
         {
-            printf("Thread %d \t %lld \n", arg->thread_n, i);
+            printf("\nThread %d \t %lld", arg->thread_n, i);
         }
     }
 
-    printf("Thread %d done\n", arg->thread_n);
+    printf("\nThread %d done", arg->thread_n);
 }
 
 
@@ -37,12 +38,11 @@ int main(int argc, char** argv)
     /* long long int number = strtoll(argv[1], argv[2], 8); */
     /* int n_threads = atoi(argv[2]); */
     
-    long long int number = 24;
+    long long int number = 4294967134;
+    /* unsigned long long int number = 1 << 25; */
     int n_threads = 4;
 
-    printf("Number: %lld \t Threads: %d \n", number, n_threads);
-
-    printf("THE MAIN\n");
+    printf("\nNumber: %lld \t Threads: %d \n\n", number, n_threads);
 
     struct Args args;
     args.n = number;
@@ -54,7 +54,7 @@ int main(int argc, char** argv)
     pthread_t threads[4];
 
     /* should be floor division */
-    long long int range = number / n_threads;
+    unsigned long long int range = (number / 2) / n_threads;
 
     for (int i = 0; i < n_threads; i ++)
     {
@@ -91,6 +91,8 @@ int main(int argc, char** argv)
 
         pthread_detach(threads[i]);
     }
+
+    printf("\n");
 
     return 0;
 }
