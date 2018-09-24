@@ -38,7 +38,7 @@ int main(int argc, char** argv)
     /* long long int number = strtoll(argv[1], argv[2], 8); */
     /* int n_threads = atoi(argv[2]); */
     
-    long long int number = 4294967134;
+    long long int number = 2 << 28;
     /* unsigned long long int number = 1 << 25; */
     int n_threads = 4;
 
