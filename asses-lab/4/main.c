@@ -19,7 +19,9 @@ void* generate_points(void* id)
     // set up the random number generator
     srand(pthread_self());
 
-    for (int i = 0; i < 100; i ++)
+    int loop_count = 100;
+
+    for (int i = 0; i < loop_count; i ++)
     {
         x = rand() % 21;
         y = rand() % 21;
@@ -59,7 +61,9 @@ int main(int argc, char** argv)
     char output[1024];
 
     int completed_threads = 0;
-    int sum;
+    long long sum;
+    int is_update = 0;
+    int last_completed_threads;
 
     pthread_t tid[n_threads];
 
@@ -76,62 +80,83 @@ int main(int argc, char** argv)
         sum = 0;
 
         pthread_create(&tid[i], NULL, generate_points, (void*)&in_square[i]);
-        pthread_join(tid[i], NULL);
+        // pthread_join(tid[i], NULL);
         // pthread_detach(tid[i]);
 
         // DONT JOIN
+    }
 
 
+    while (completed_threads < n_threads)
+    {
+        sum = 0;
         completed_threads = 0;
         // now can do some output
-        for (int j = 0; j < n_threads; j ++)
+        for (int i = 0; i < n_threads; i ++)
         {
-            if (in_square[j] != 0)
+            if (in_square[i] != 0)
             {
-                sum += in_square[j];
+                sum += in_square[i];
                 completed_threads ++;
             }
         }
+
+        is_update = 0;
+
+        if (last_completed_threads != completed_threads)
+        {
+            is_update = 1;
+        }
+
+        last_completed_threads = completed_threads;
+
         
-        calculated_pi = 4.0 * (sum) / (100.0 * completed_threads);
-        error = ((calculated_pi - PI_VALUE) / PI_VALUE) * 100.0;
-
-        if (!b_flag)
+        if (is_update)
         {
-            printf("%d) PI = %Lf \t Error = %Lf%\n", calculated_pi, error);
-        }
-        else
-        {
-            // clears the line
-            // printf("\33[2K\r");
-            printf("\r");
-            printf("Progress: %f ", 100.0 * completed_threads / n_threads);
+            calculated_pi = 4.0 * (sum) / (100.0 * completed_threads);
+            error = ((calculated_pi - PI_VALUE) / PI_VALUE) * 100.0;
 
-            for (int k = 0; k < completed_threads; k ++)
+            if (!b_flag)
             {
-                printf("▒");
+                printf("%d) PI = %Lf \t Error = %Lf%\n", completed_threads, calculated_pi, error);
             }
-
-            for (int l = completed_threads; l < n_threads; l ++)
+            else
             {
-                printf("_");
-            }
+                // clears the line
+                // printf("\33[2K\r");
+                printf("\r");
+                printf("Progress: %f ", 100.0 * completed_threads / n_threads);
 
-            printf("| PI = %Lf Error = %Lf%", calculated_pi, error);
+                // really should max a max length bar
+                // max length of 10
+
+                for (int k = 0; k < completed_threads; k ++)
+                {
+                    printf("▒");
+                }
+
+                for (int l = completed_threads; l < n_threads; l ++)
+                {
+                    printf("_");
+                }
+
+                printf("| PI = %Lf Error = %Lf%", calculated_pi, error);
+            }
         }
 
-        if (DEBUG)
-        { 
-            printf("THREAD ID: %d \n", tid[i]);
-            printf("SUM: %d \n", sum);
-            printf("4.0 * sum: %f\n", 4.0 * sum);
-            // printing the contents of in_square
-            for (int k = 0; k < n_threads; k ++)
-            {
-                printf("%d ", in_square[k]);
-            }
-            printf("\n");
-        }
+        // if (DEBUG)
+        // { 
+        //     printf("THREAD ID: %d \n", tid[i]);
+        //     printf("SUM: %d \n", sum);
+        //     printf("4.0 * sum: %f\n", 4.0 * sum);
+        //     // printing the contents of in_square
+        //     for (int k = 0; k < n_threads; k ++)
+        //     {
+        //         printf("%d ", in_square[k]);
+        //     }
+        //     printf("\n");
+        // }
+
     }
 
     printf("\n");
